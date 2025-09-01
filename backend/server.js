@@ -2,14 +2,13 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['GET','POST']
+    origin: 'https://texting-pxwv4si66-aditya-kulkarni-s-projects-52b41b74.vercel.app', // Restrict to your frontend
+    methods: ['GET', 'POST']
   }
 });
 
@@ -17,7 +16,7 @@ const io = new Server(server, {
 // Structure: { roomId: [ {id, nick, text, ts} ] }
 const rooms = {};
 
-io.on('connection', socket => {
+io.on('connection', (socket) => {
   console.log('socket connected:', socket.id);
 
   socket.on('join-room', ({ roomId, nick }) => {
@@ -61,10 +60,9 @@ io.on('connection', socket => {
   });
 });
 
-// Serve static frontend if built (optional)
-app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
+// Optional health check endpoint
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
+  res.send('Backend is running');
 });
 
 const PORT = process.env.PORT || 3001;
