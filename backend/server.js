@@ -7,13 +7,14 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'https://texting-pxwv4si66-aditya-kulkarni-s-projects-52b41b74.vercel.app', // Restrict to your frontend
-    methods: ['GET', 'POST']
+    origin: 'https://texting-pxwv4si66-aditya-kulkarni-s-projects-52b41b74.vercel.app', // Specific origin
+    methods: ['GET', 'POST'],
+    credentials: true, // Allow credentials if needed
+    transports: ['websocket', 'polling'] // Explicitly allow WebSocket
   }
 });
 
-// In-memory store (messages live only while server runs)
-// Structure: { roomId: [ {id, nick, text, ts} ] }
+// In-memory store
 const rooms = {};
 
 io.on('connection', (socket) => {
@@ -23,7 +24,6 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     socket.data.nick = nick || 'Anon';
     socket.data.roomId = roomId;
-    // Send existing in-memory messages for that room (if any)
     const history = rooms[roomId] || [];
     socket.emit('room-history', history);
     io.to(roomId).emit('user-joined', { id: socket.id, nick: socket.data.nick });
@@ -40,7 +40,6 @@ io.on('connection', (socket) => {
     };
     rooms[roomId] = rooms[roomId] || [];
     rooms[roomId].push(msg);
-    // Broadcast to room
     io.to(roomId).emit('new-message', msg);
   });
 
@@ -56,11 +55,9 @@ io.on('connection', (socket) => {
     if (roomId) {
       socket.to(roomId).emit('user-left', { id: socket.id, nick: socket.data.nick });
     }
-    // NOTE: We do NOT persist messages. They remain in memory until server stops.
   });
 });
 
-// Optional health check endpoint
 app.get('/', (req, res) => {
   res.send('Backend is running');
 });
