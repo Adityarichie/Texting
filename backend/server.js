@@ -7,7 +7,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'https://texting-pxwv4si66-aditya-kulkarni-s-projects-52b41b74.vercel.app', // Restrict to your frontend
+    origin: [
+      'https://aditextingapp.vercel.app',
+      'https://texting-pxwv4si66-aditya-kulkarni-s-projects-52b41b74.vercel.app'
+    ],
     methods: ['GET', 'POST']
   }
 });
